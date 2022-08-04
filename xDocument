@@ -1,0 +1,47 @@
+ public XDocument XmlAgentesPublicos(List<ListaAgPublico> retlist)
+        {
+            dynamic listaAgPub = retlist;
+
+            XNamespace gen = "http://www.tce.sp.gov.br/audesp/xml/generico";
+            XNamespace ap = "http://www.tce.sp.gov.br/audesp/xml/atospessoal";
+            XNamespace ag = "http://www.tce.sp.gov.br/audesp/xml/quadrofuncional-agentepublico";
+            XNamespace xsi = "http://www.w3.org/2001/XMLSchema-instance";
+
+            XElement list = new XElement(ag + "ListaAgentePublico");
+            for (int i = 0; i < listaAgPub.Count; i++)
+            {
+                DateTime dataNascimento = Convert.ToDateTime(listaAgPub[i].Datanasc);
+
+                XElement row = new XElement(ag + "AgentePublico");
+                row.Add(new XElement(ag + "nome", listaAgPub[i].Nome));
+                row.Add(new XElement(ag + "cpf", new XAttribute("Tipo", "02"),
+                        new XElement(gen + "Numero", listaAgPub[i].Cpf)));
+                row.Add(new XElement(ag + "pis_pasep", listaAgPub[i].Pasep));
+                row.Add(new XElement(ag + "dataNascimento", dataNascimento.ToString("yyyy-MM-dd")));
+                row.Add(new XElement(ag + "sexo", listaAgPub[i].Sexo));
+                row.Add(new XElement(ag + "nacionalidade", listaAgPub[i].Nacionalidade));
+                row.Add(new XElement(ag + "escolaridade", listaAgPub[i].Escolaridade));
+                row.Add(new XElement(ag + "especialidade", listaAgPub[i].Especialidade));
+                list.Add(row);
+            };
+
+            XDocument doc = new XDocument(
+                new XDeclaration("1.0", "ISO-8859-1", null),
+                    new XElement(ag + "AgentesPublicos",
+                        new XAttribute(XNamespace.Xmlns + "xsi", xsi.NamespaceName),
+                        new XAttribute(XNamespace.Xmlns + "ag", ag.NamespaceName),
+                        new XAttribute(XNamespace.Xmlns + "ap", ap.NamespaceName),
+                        new XAttribute(XNamespace.Xmlns + "gen", gen.NamespaceName),
+                        new XAttribute(xsi + "schemaLocation", "http://www.tce.sp.gov.br/audesp/xml/quadrofuncional-agentepublico/quadrofuncional/AUDESP_AGENTEPUBLICO_2021_A.XSD"),
+                    new XElement(ag + "Descritor",
+                        new XElement(gen + "AnoExercicio", "2021"),
+                        new XElement(gen + "TipoDocumento", "Agente Público"),
+                        new XElement(gen + "Entidade", listaAgPub[0].EntidadeCodigo),
+                        new XElement(gen + "Municipio", listaAgPub[0].CodigoMunicipio),
+                        new XElement(gen + "DataCriacaoXML", DateTime.Now.ToString("yyyy-MM-dd"))
+                    ),
+                    new XElement(list)
+            ));
+
+            return doc;
+        }
